@@ -5,3 +5,4 @@ Flask-WTF
 python-dotenv
 email-validator 
 gunicorn
+Flask-Admin
