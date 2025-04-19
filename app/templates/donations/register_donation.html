@@ -1,0 +1,227 @@
+{% extends "base.html" %} {# Change to extend from base.html #}
+{% from "_formhelpers.html" import render_field %}
+
+{% block header_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <h2 class="mb-4 text-center"><i class="bi bi-box2-heart-fill me-2"></i>{{ title }}</h2>
+            <p class="text-center text-muted mb-4">Điền thông tin dưới đây để chúng tôi có thể tiếp nhận và phân phối đóng góp của bạn hiệu quả nhất.</p>
+
+            <form method="POST" novalidate id="donation-form">
+                {{ form.hidden_tag() }}
+
+                {# Section 1: Donor Info #}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">🧑‍💼 Thông tin nhà cung cấp</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ render_field(form.donor_name, {'class': 'form-control'}) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_field(form.contact_person, {'class': 'form-control'}) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_field(form.phone, {'class': 'form-control', 'type': 'tel'}) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_field(form.email, {'class': 'form-control', 'type': 'email'}) }}
+                            </div>
+                            <div class="col-12">
+                                {{ render_field(form.pickup_address, {'class': 'form-control', 'rows': 2}) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Section 2: Food Items #}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">🍱 Thông tin thực phẩm đóng góp</h5>
+                        <button type="button" class="btn btn-sm btn-success" id="add-food-item">+ Thêm dòng</button>
+                    </div>
+                    <div class="card-body" id="food-items-list">
+                        {# FieldList items will be rendered here by JS or loop #}
+                        {% for item_form in form.food_items %}
+                        <div class="food-item-row border-bottom pb-3 mb-3">
+                             <input type="hidden" name="{{ item_form.form.csrf_token.name }}" value="{{ item_form.form.csrf_token.current_token }}">
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-4">
+                                    {{ render_field(item_form.category, {'class': 'form-select form-select-sm'}) }}
+                                </div>
+                                <div class="col-md-2">
+                                    {{ render_field(item_form.quantity, {'class': 'form-control form-control-sm', 'type': 'number', 'step': 'any'}) }}
+                                </div>
+                                 <div class="col-md-2">
+                                    {{ render_field(item_form.unit, {'class': 'form-select form-select-sm'}) }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ render_field(item_form.expiry_date, {'class': 'form-control form-control-sm', 'type': 'date'}) }}
+                                </div>
+                                <div class="col-1 d-flex justify-content-end">
+                                    <button type="button" class="btn btn-sm btn-danger remove-food-item" title="Xóa dòng này"><i class="bi bi-trash"></i></button>
+                                </div>
+                                <div class="col-12 mt-2">
+                                     {{ render_field(item_form.notes, {'class': 'form-control form-control-sm', 'rows': 1, 'placeholder': 'Ghi chú thêm cho món này (VD: gà quay nên giao sáng nay)'}) }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div id="food-item-template" style="display: none;">
+                             {# Template for new rows - indexes will be replaced by JS #}
+                             <div class="food-item-row border-bottom pb-3 mb-3">
+                                 <input type="hidden" name="food_items-__prefix__-csrf_token" value="{{ form.food_items.append_entry().form.csrf_token.current_token }}"> {# Generate a token for template #}
+                                 <div class="row g-2 align-items-end">
+                                    <div class="col-md-4">
+                                        {{ render_field(form.food_items.append_entry().form.category, {'class': 'form-select form-select-sm'}) }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ render_field(form.food_items.append_entry().form.quantity, {'class': 'form-control form-control-sm', 'type': 'number', 'step': 'any'}) }}
+                                    </div>
+                                     <div class="col-md-2">
+                                        {{ render_field(form.food_items.append_entry().form.unit, {'class': 'form-select form-select-sm'}) }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ render_field(form.food_items.append_entry().form.expiry_date, {'class': 'form-control form-control-sm', 'type': 'date'}) }}
+                                    </div>
+                                    <div class="col-1 d-flex justify-content-end">
+                                        <button type="button" class="btn btn-sm btn-danger remove-food-item" title="Xóa dòng này"><i class="bi bi-trash"></i></button>
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        {{ render_field(form.food_items.append_entry().form.notes, {'class': 'form-control form-control-sm', 'rows': 1, 'placeholder': 'Ghi chú thêm cho món này (VD: gà quay nên giao sáng nay)'}) }}
+                                    </div>
+                                </div>
+                             </div>
+                             {# Need to remove the last dummy entries created by template generation #}
+                             {# Note: Calling pop_entry() here might be unnecessary if initial entries are handled correctly #}
+                             {# It's safer to let the backend handle potentially sparse indexes from JS removal #}
+                             {# {% do form.food_items.pop_entry() %} ... etc ... #}
+                        </div>
+                    </div>
+                </div>
+
+                {# Section 3: Logistics #}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">⏱ Thời gian & Địa điểm Giao/Nhận</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.availability_window.label }}</label>
+                                {{ render_field(form.availability_window, {}) }} {# Render checkboxes #}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-3">
+                                    {{ form.requires_pickup(class='form-check-input', role='switch', id='requires_pickup_switch') }}
+                                    {{ form.requires_pickup.label(class='form-check-label') }}
+                                </div>
+                                <div id="dropoff-hub-section" style="display: none;"> {# Initially hidden #}
+                                     <label for="dropoff_hub_select" class="form-label">Chọn Hub sẽ giao đến:</label>
+                                     {{ form.intended_dropoff_hub_id() }} {# Hidden field to store the value #}
+                                     <select id="dropoff_hub_select" class="form-select">
+                                         <option value="">-- Chọn Hub --</option>
+                                         {% for hub in hubs %}
+                                         <option value="{{ hub.id }}">{{ hub.name }} ({{ hub.address }})</option>
+                                         {% endfor %}
+                                     </select>
+                                     {# Display validation error for the hidden field if needed #}
+                                     {% if form.intended_dropoff_hub_id.errors %}
+                                         <div class="invalid-feedback d-block">
+                                             {% for error in form.intended_dropoff_hub_id.errors %}
+                                                 <span>{{ error }}</span><br>
+                                             {% endfor %}
+                                         </div>
+                                     {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Submit Button #}
+                <div class="text-center">
+                    {{ form.submit(class='btn btn-primary btn-lg px-5') }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const foodList = document.getElementById('food-items-list');
+    const addButton = document.getElementById('add-food-item');
+    const template = document.getElementById('food-item-template').innerHTML;
+    let index = {{ form.food_items|length }};
+
+    function updateRemoveButtons() {
+        const removeButtons = foodList.querySelectorAll('.remove-food-item');
+        if (foodList.querySelectorAll('.food-item-row').length <= 1) {
+            removeButtons.forEach(btn => btn.style.display = 'none');
+        } else {
+            removeButtons.forEach(btn => btn.style.display = 'inline-block');
+        }
+    }
+
+    addButton.addEventListener('click', function() {
+        const newRowHtml = template.replace(/__prefix__/g, index);
+        const newRowDiv = document.createElement('div');
+        newRowDiv.innerHTML = newRowHtml;
+        foodList.insertBefore(newRowDiv.firstElementChild, document.getElementById('food-item-template'));
+        index++;
+        updateRemoveButtons();
+    });
+
+    foodList.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-food-item')) {
+            e.target.closest('.food-item-row').remove();
+            // Renumbering indexes after removal is complex and often not strictly necessary
+            // if the backend handles missing indexes gracefully.
+            // If renumbering is needed, it's more involved JS.
+            updateRemoveButtons();
+        }
+    });
+
+    // Toggle Hub dropdown visibility based on requires_pickup
+    const requiresPickupSwitch = document.getElementById('requires_pickup_switch');
+    const dropoffHubSection = document.getElementById('dropoff-hub-section');
+    const dropoffHubSelect = document.getElementById('dropoff_hub_select');
+    const hiddenHubIdInput = document.getElementById('intended_dropoff_hub_id');
+
+    function toggleHubSection() {
+        if (requiresPickupSwitch.checked) {
+            dropoffHubSection.style.display = 'none';
+            dropoffHubSelect.value = ''; // Clear selection
+            hiddenHubIdInput.value = ''; // Clear hidden field
+        } else {
+            dropoffHubSection.style.display = 'block';
+        }
+    }
+
+    requiresPickupSwitch.addEventListener('change', toggleHubSection);
+
+    // Update hidden field when dropdown changes
+    dropoffHubSelect.addEventListener('change', function() {
+        hiddenHubIdInput.value = this.value;
+    });
+
+    // Initial setup
+    updateRemoveButtons();
+    toggleHubSection();
+    // Set initial dropdown value if hidden field has value (e.g., on validation error reload)
+    if (hiddenHubIdInput.value) {
+        dropoffHubSelect.value = hiddenHubIdInput.value;
+    }
+
+});
+</script>
+{% endblock %} 

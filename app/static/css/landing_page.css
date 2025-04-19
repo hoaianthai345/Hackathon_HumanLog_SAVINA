@@ -1,0 +1,232 @@
+/* Landing Page Specific Styles */
+body {
+    font-family: sans-serif;
+    position: relative; /* Required for Scrollspy offset */
+}
+
+.hero-section {
+    /* background-color: #f8f9fa; */ /* Removed background color */
+    padding: 8rem 0; /* Increased padding for better background visibility */
+    text-align: center;
+    /* --- UPDATED --- */
+    background: url('app/static/img/landing-banner.jpg') no-repeat center bottom; /* Changed center center to center bottom */
+    background-size: cover; /* Scale the image to cover the section */
+    color: white; /* Change text color to white for better contrast */
+    position: relative; /* For pseudo-element overlay */
+    z-index: 1; /* Ensure content is above pseudo-element */
+}
+
+/* Optional: Add a dark overlay for better text readability */
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5); /* Adjust darkness (0.5 = 50% black) */
+    z-index: -1; /* Place overlay behind content */
+}
+
+.hero-section h1 {
+    /* color: #722f37; */ /* Removed original color */
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: inherit; /* Inherit white color from .hero-section */
+}
+
+.hero-section .lead {
+    /* color: #495057; */ /* Removed original color */
+    margin-bottom: 2rem;
+    color: rgba(255, 255, 255, 0.9); /* Slightly transparent white for lead text */
+    font-weight: 300; /* Lighter font weight */
+}
+
+/* Style for the secondary button specifically in the hero section */
+.hero-section .btn-outline-secondary {
+    background-color: #ffffff; /* White background */
+    border-color: #722f37; /* Wine red border */
+    color: #722f37; /* Wine red text */
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.hero-section .btn-outline-secondary:hover {
+    background-color: #f8f9fa; /* Light grey background on hover */
+    border-color: #5a252d; /* Darker wine red border */
+    color: #5a252d; /* Darker wine red text */
+}
+
+.btn-wine {
+    background-color: #722f37; /* Original wine red */
+    border-color: #722f37;
+    color: white; /* Original white text */
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease, border-color 0.2s ease; /* Reverted transition */
+}
+
+.btn-wine:hover {
+    background-color: #5a252d; /* Darker wine red */
+    border-color: #5a252d;
+    color: white;
+}
+
+/* Navbar Styles */
+.navbar {
+    transition: padding 0.3s ease;
+}
+
+.navbar .nav-link {
+    color: #495057;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    padding: 0.5rem 0.75rem; /* Adjust padding */
+}
+
+.navbar .nav-link:hover {
+    color: #722f37;
+}
+
+.navbar .nav-link.active {
+    color: #722f37 !important; /* Wine red for active link */
+    font-weight: bold;
+}
+
+/* Ensure consistent button padding in navbar */
+.btn-nav-action {
+    padding: 0.375rem 0.85rem; /* Match btn-sm padding-y and adjust padding-x */
+    font-size: 0.875rem; /* Match btn-sm font-size */
+}
+
+.section {
+    padding: 4rem 0;
+}
+
+/* Styles for sections with bg-light OR #get-involved */
+.section.bg-light,
+section#get-involved { /* Target #get-involved specifically */
+    background-color: #722f37 !important; /* Wine red background - Added !important */
+    color: #f8f9fa; /* Light text color for better contrast */
+}
+
+/* Override specific element colors within bg-light OR #get-involved sections */
+.section.bg-light .section-title,
+section#get-involved .section-title, /* Target title */
+.section.bg-light .feature-icon,
+section#get-involved .feature-icon, /* Target icon */
+.section.bg-light .how-it-works-item h5, /* Keep for other bg-light sections */
+section#get-involved .get-involved-item h5 { /* Target h5 in #get-involved */
+    color: white; /* Ensure titles, icons, and subheadings are white */
+}
+
+/* Removed background image styles for .section.bg-light */
+
+.section-title {
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #722f37;
+    font-weight: bold;
+}
+
+.feature-icon {
+    font-size: 3rem;
+    color: #722f37; /* Wine red */
+    margin-bottom: 1rem;
+}
+
+.how-it-works-item, .get-involved-item {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.how-it-works-item h5, .get-involved-item h5 {
+    color: #343a40;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.footer {
+    background-color: #343a40; /* Dark footer */
+    color: white;
+    padding: 2rem 0;
+    margin-top: 0; /* Remove top margin to make backgrounds touch */
+}
+
+.footer a {
+    color: #adb5bd;
+}
+
+.footer a:hover {
+    color: white;
+}
+
+/* --- Role Box Styles (Adapted for Landing Page) --- */
+
+.role-container-landing {
+    /* Uses d-flex, flex-wrap, justify-content-center, gap-4 from bootstrap */
+}
+
+.role-box-landing {
+    background-color: #722f37; /* Wine red background */
+    color: white;
+    width: 220px; /* Fixed width */
+    min-height: 160px; /* Minimum height */
+    padding: 25px;
+    border-radius: 10px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.role-box-landing:hover {
+    transform: translateY(-5px); /* Smaller lift effect */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    color: white; /* Ensure text remains white on hover */
+}
+
+.role-box-landing i {
+    font-size: 3rem; /* Slightly smaller icon */
+    margin-bottom: 15px;
+}
+
+.role-box-landing .role-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.role-box-landing .role-description {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+/* Add background image to sections with text-center */
+.section.text-center {
+    background: url('../img/end-banner-landing.png') no-repeat center top; /* Changed position to center top */
+    background-size: cover;
+    color: black; /* Changed text color to black */
+    position: relative; /* Needed for potential overlay */
+    z-index: 1;
+    padding-bottom: 1rem; /* Add bottom padding to compensate for removed footer margin */
+}
+
+/* Optional overlay for text-center section */
+/*
+.section.text-center::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4); 
+    z-index: -1; 
+}
+*/ 

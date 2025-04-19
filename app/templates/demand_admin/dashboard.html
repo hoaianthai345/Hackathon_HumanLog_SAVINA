@@ -1,0 +1,454 @@
+{% extends "base.html" %}
+
+{% block header_title %}{{ title }}{% endblock %}
+
+{# 1. Leaflet CSS & Custom Styles #}
+{% block head_extra %}
+{{ super() }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{# Add Leaflet MarkerCluster CSS #}
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+<style>
+    #dashboard-map {
+        height: 500px; /* Adjusted height */
+        width: 100%;
+    }
+    .chart-placeholder {
+        height: 180px; /* Slightly taller */
+        background-color: #e9e9e9;
+        display: flex;
+        flex-direction: column; /* Stack text */
+        align-items: center;
+        justify-content: center;
+        color: #777;
+        margin-top: 0.5rem;
+        border-radius: 0.375rem;
+        font-size: 0.9rem;
+        text-align: center;
+        padding: 1rem;
+    }
+    .drag-drop-placeholder {
+        border: 2px dashed #ccc;
+        padding: 1rem;
+        margin-top: 0.5rem;
+        min-height: 120px; /* Taller */
+        background-color: #fafafa;
+        color: #888;
+        text-align: center;
+        border-radius: 0.375rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+    .filters label, .sorting label {
+        margin-right: 0.5rem;
+    }
+    .filters, .sorting {
+        margin-bottom: 0.5rem;
+    }
+    .card-body .table {
+        margin-bottom: 0;
+    }
+    .card h3 {
+       font-size: 1rem;
+       font-weight: 600;
+       margin-top: 1rem;
+       margin-bottom: 0.5rem;
+    }
+    .card-body p {
+        margin-bottom: 0.5rem;
+    }
+    .card-body p small {
+        display: block;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+     .table .btn-sm {
+        padding: 0.1rem 0.4rem;
+        font-size: 0.75rem;
+     }
+     .legend {
+         padding: 6px 8px;
+         font: 14px/16px Arial, Helvetica, sans-serif;
+         background: white;
+         background: rgba(255,255,255,0.8);
+         box-shadow: 0 0 15px rgba(0,0,0,0.2);
+         border-radius: 5px;
+         line-height: 18px;
+         color: #555;
+     }
+     .legend i {
+         width: 18px;
+         height: 18px;
+         float: left;
+         margin-right: 8px;
+         opacity: 0.7;
+     }
+     /* Custom Marker Colors (using simple background for example) */
+     .legend .recipient { background: red; }
+     .legend .cluster { background: orange; } /* Yellow might be hard to see */
+     .legend .hub { background: green; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {# Page Header #}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-compass-fill me-2"></i>{{ title }} - Demand Admin</h1> {# Updated Icon #}
+        {# Add controls if needed later #}
+    </div>
+
+    <div class="row">
+        {# Left Column (Map & Routes) - Takes 7/12 grid columns #}
+        <div class="col-lg-7 mb-3">
+            {# Map Card #}
+            <div class="card shadow-sm mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📍 Bản đồ chính (MapView)</h5>
+                    {# Button to trigger AI actions? #}
+                    <button class="btn btn-sm btn-info"><i class="bi bi-magic me-1"></i> Tối ưu & Gợi ý</button>
+                </div>
+                <div class="card-body p-2 position-relative"> {# Added position-relative for legend #}
+                    {# Map Container Div #}
+                    <div id="dashboard-map"></div>
+                    {# Map Legend (will be added via JS) #}
+                </div>
+                 <div class="card-footer bg-transparent border-top-0 pt-0 px-2 pb-2">
+                     <p class="mb-1"><small><strong>AI Hiển thị:</strong> 🔴 Vị trí người cần cứu trợ, 🟡 Cụm nhu cầu (clustering), 🟢 Kho/trạm, 🛣️ Tuyến đường AI gợi ý.</small></p>
+                     <p class="mb-0"><small><i>Tương tác với bản đồ để xem chi tiết hoặc bắt đầu tạo tuyến.</i></small></p>
+                </div>
+            </div>
+
+            {# Delivery Routes Card #}
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">🛵 Tuyến giao hàng & Tình nguyện viên</h5>
+                </div>
+                <div class="card-body">
+                    <div class="drag-drop-placeholder mb-3">
+                        <i class="bi bi-arrows-move fs-3 mb-2"></i>
+                        <div>[Giao diện Kéo-Thả người/cụm từ bản đồ vào tuyến]<br><small>(Prototype: Hiển thị tuyến được AI gợi ý)</small></div>
+                    </div>
+                    <h3>Các tuyến đang hoạt động</h3>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Tuyến</th>
+                                    <th scope="col">Từ kho</th>
+                                    <th scope="col">Đến vùng/Cụm</th>
+                                    <th scope="col">TNV/Shipper</th>
+                                    <th scope="col">Trạng thái</th>
+                                    <th scope="col">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {# Sample Route Data #}
+                                <tr>
+                                    <td>T001 <span class="badge bg-info text-dark ms-1">AI</span></td>
+                                    <td>Kho A</td>
+                                    <td>Cụm Xã B (5 điểm)</td>
+                                    <td>NV Giao Hàng 1</td>
+                                    <td><span class="badge bg-warning text-dark">Đang giao</span></td>
+                                    <td><button class="btn btn-outline-secondary btn-sm"><i class="bi bi-eye"></i></button></td>
+                                </tr>
+                                <tr>
+                                    <td>T002</td>
+                                    <td>Kho B</td>
+                                    <td>Phường C (3 điểm)</td>
+                                    <td>Tình nguyện viên Y</td>
+                                     <td><span class="badge bg-success">Đã hoàn thành</span></td>
+                                     <td><button class="btn btn-outline-secondary btn-sm"><i class="bi bi-eye"></i></button></td>
+                                </tr>
+                                <tr>
+                                    <td>T003</td>
+                                    <td>Kho A</td>
+                                    <td>Điểm Z (1 người)</td>
+                                    <td>Chưa giao</td>
+                                     <td><span class="badge bg-light text-dark">Chờ xử lý</span></td>
+                                     <td><button class="btn btn-primary btn-sm"><i class="bi bi-person-plus"></i> Giao việc</button></td>
+                                </tr>
+                                <!-- More route rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Right Column (Recipient List, AI Stats, Supply) - Takes 5/12 grid columns #}
+        <div class="col-lg-5">
+            {# Recipient List Card #}
+             <div class="card shadow-sm mb-3">
+                 <div class="card-header">
+                     <h5 class="mb-0">🧑‍🤝‍🧑 Danh sách người cần cứu trợ</h5>
+                 </div>
+                <div class="card-body">
+                    <div class="filters mb-2">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label for="filter-province" class="form-label form-label-sm">Tỉnh/TP:</label>
+                                <select id="filter-province" class="form-select form-select-sm">
+                                    <option selected value="">Tất cả</option>
+                                    <option value="DN">Đà Nẵng</option>
+                                    <option value="QN">Quảng Ngãi</option>
+                                    <!-- More provinces -->
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="filter-priority" class="form-label form-label-sm">Mức độ ưu tiên:</label>
+                                <select id="filter-priority" class="form-select form-select-sm">
+                                    <option selected value="">Tất cả</option>
+                                    <option value="cao">Cao</option>
+                                    <option value="tb">Trung bình</option>
+                                    <option value="thap">Thấp</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sorting mb-2">
+                         <label for="sort-by" class="form-label form-label-sm">Sắp xếp:</label>
+                        <select id="sort-by" class="form-select form-select-sm w-auto d-inline-block">
+                            <option value="priority">Ưu tiên</option>
+                            <option value="date">Ngày cần giao</option>
+                            <option value="distance">Khoảng cách (AI)</option>
+                        </select>
+                    </div>
+                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;"> {# Scrollable Table #}
+                        <table class="table table-striped table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Tên</th>
+                                    {# <th scope="col">Vị trí</th> #}
+                                    <th scope="col">Người</th>
+                                    <th scope="col">Ưu tiên</th>
+                                    <th scope="col">Hạn giao</th>
+                                    <th scope="col">Chi tiết</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {# Sample Recipient Data #}
+                                <tr>
+                                    <td>Nguyễn Văn A<br><small class="text-muted">Q. Hải Châu</small></td>
+                                    {# <td>Quảng Ngãi</td> #}
+                                    <td>5</td>
+                                    <td><span class="badge bg-danger">Cao</span></td>
+                                    <td>20/04</td>
+                                    <td><button class="btn btn-outline-primary btn-sm" title="Xem trên bản đồ"><i class="bi bi-geo-alt"></i></button></td>
+                                </tr>
+                                <tr>
+                                    <td>Trần Thị B<br><small class="text-muted">Q. Sơn Trà</small></td>
+                                    {# <td>Đà Nẵng</td> #}
+                                    <td>3</td>
+                                    <td><span class="badge bg-warning text-dark">TB</span></td>
+                                    <td>22/04</td>
+                                     <td><button class="btn btn-outline-primary btn-sm" title="Xem trên bản đồ"><i class="bi bi-geo-alt"></i></button></td>
+                                </tr>
+                                 <tr>
+                                    <td>Lê Văn C<br><small class="text-muted">Q. Liên Chiểu</small></td>
+                                    {# <td>Đà Nẵng</td> #}
+                                    <td>2</td>
+                                    <td><span class="badge bg-danger">Cao</span></td>
+                                    <td>20/04</td>
+                                     <td><button class="btn btn-outline-primary btn-sm" title="Xem trên bản đồ"><i class="bi bi-geo-alt"></i></button></td>
+                                </tr>
+                                 <tr>
+                                    <td>Phạm Thị D<br><small class="text-muted">H. Hòa Vang</small></td>
+                                    {# <td>Đà Nẵng</td> #}
+                                    <td>4</td>
+                                    <td><span class="badge bg-success">Thấp</span></td>
+                                    <td>25/04</td>
+                                     <td><button class="btn btn-outline-primary btn-sm" title="Xem trên bản đồ"><i class="bi bi-geo-alt"></i></button></td>
+                                </tr>
+                                <!-- More recipient rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {# AI Stats/Clustering Card #}
+            <div class="card shadow-sm mb-3">
+                 <div class="card-header">
+                     <h5 class="mb-0"><i class="bi bi-cpu me-1"></i> AI Phân tích & Gợi ý</h5>
+                 </div>
+                <div class="card-body">
+                    <div class="chart-placeholder">
+                        <i class="bi bi-pie-chart-fill fs-2 mb-2"></i>
+                        [Biểu đồ AI: Phân cụm nhu cầu theo khu vực/mức độ ưu tiên]
+                    </div>
+                     <p class="mt-2 mb-1"><strong><i class="bi bi-box-seam text-primary"></i> Tổng gói cần giao:</strong> 1,250 (Ước tính)</p>
+                    <p class="mb-1"><strong><i class="bi bi-clock-history text-info"></i> Thời gian V/C TB (AI dự đoán):</strong> 35 phút</p>
+                    <p class="mb-1"><strong><i class="bi bi-bullseye text-success"></i> Số cụm tối ưu (AI gợi ý):</strong> 15 cụm</p>
+                    <p class="small text-muted"><i>AI liên tục phân tích dữ liệu để đưa ra gợi ý phân phối hiệu quả nhất.</i></p>
+                </div>
+            </div>
+
+            {# Supply Status Card #}
+             <div class="card shadow-sm mb-3">
+                 <div class="card-header">
+                     <h5 class="mb-0">📦 Tình trạng nguồn cung ứng</h5>
+                 </div>
+                <div class="card-body">
+                    <p><strong>Kho A:</strong> <span class="badge bg-success">Đủ hàng</span> (1000 gói)</p>
+                    <p><strong>Kho B:</strong> <span class="badge bg-danger">Sắp hết</span> (50 gói)</p>
+                    <p><strong>Trạm C:</strong> <span class="badge bg-info text-dark">Còn hàng</span> (300 gói)</p>
+                    <hr class="my-2">
+                    <p class="mb-1"><strong class="text-primary"><i class="bi bi-lightbulb-fill me-1"></i> AI Gợi ý:</strong></p>
+                    <p class="small mb-0"><i>Nên điều phối 100 gói từ Kho A đến Kho B để đáp ứng nhu cầu dự kiến tại khu vực đó.</i></p>
+                </div>
+                 <div class="card-footer bg-light">
+                      <a href="#" class="btn btn-secondary btn-sm">Quản lý kho</a> {# Link to supply admin? #}
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    {# Hidden Data #}
+    <script id="hub-data" type="application/json">{{ hubs | tojson | safe }}</script>
+    {# TODO: Add recipient data, cluster data etc. #}
+    <script id="recipient-data" type="application/json">[]</script> {# Placeholder #}
+
+</div> {# End container-fluid #}
+{% endblock %}
+
+{# Leaflet JS and Initialization #}
+{% block scripts %}
+{{ super() }}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{# Add Leaflet MarkerCluster JS #}
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const mapElement = document.getElementById('dashboard-map');
+        if (!mapElement) {
+            console.error("Map container element (#dashboard-map) not found!");
+            return;
+        }
+
+        // Initialize Map
+        const map = L.map('dashboard-map').setView([10.7769, 106.7009], 12); // Center on Ho Chi Minh City
+
+        // Tile Layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // --- AI Visualization Placeholders --- 
+
+        // 1. Hubs (Green Markers 🟢)
+        const hubDataElement = document.getElementById('hub-data');
+        let hubs = [];
+        try {
+             hubs = hubDataElement ? JSON.parse(hubDataElement.textContent || '[]') : [];
+        } catch (e) { console.error("Error parsing hub data:", e); }
+
+        const hubLayer = L.layerGroup().addTo(map);
+        const hubIcon = L.divIcon({ className: 'legend hub', html: '🟢', iconSize: [18, 18], iconAnchor: [9, 9] }); // Simple icon
+        hubs.forEach(hub => {
+            if (hub.lat != null && hub.lon != null && !isNaN(hub.lat) && !isNaN(hub.lon)) {
+                L.marker([hub.lat, hub.lon], { /* icon: hubIcon */ }) // Add icon later if needed
+                 .bindPopup(`<b>🟢 Hub:</b> ${hub.name}<br>Địa chỉ: ${hub.address || 'N/A'}`)
+                 .addTo(hubLayer);
+            }
+        });
+        console.log(`${hubs.length} Hub markers added.`);
+
+        // 2. Recipients (Red Markers 🔴 - Clustered 🟡)
+        const recipientDataElement = document.getElementById('recipient-data');
+        let recipients = []; // Load actual recipient data here later
+        try {
+             recipients = recipientDataElement ? JSON.parse(recipientDataElement.textContent || '[]') : [];
+        } catch (e) { console.error("Error parsing recipient data:", e); }
+
+        const recipientMarkers = L.markerClusterGroup(); // Use MarkerCluster
+        const recipientIcon = L.divIcon({ className: 'legend recipient', html: '🔴', iconSize: [18, 18], iconAnchor: [9, 9] });
+
+        // Sample recipient data for prototype
+        recipients = [
+            { name: "Nguyễn Văn An", lat: 10.7758, lon: 106.7011, priority: "Cao", count: 5, needs: "20/04"}, // Q1 area
+            { name: "Trần Thị Bình", lat: 10.7890, lon: 106.6800, priority: "TB", count: 3, needs: "22/04"}, // Q3/Phu Nhuan area
+            { name: "Lê Văn Cường", lat: 10.7600, lon: 106.6600, priority: "Cao", count: 2, needs: "20/04"}, // Q5/Q10 area
+            { name: "Phạm Thị Dung", lat: 10.8231, lon: 106.6297, priority: "Thấp", count: 4, needs: "25/04"}, // Tan Binh/Tan Phu area
+            { name: "Hoàng Văn Em", lat: 10.7296, lon: 106.6980, priority: "TB", count: 6, needs: "21/04"}  // Q7 area
+             // Add more sample data
+        ];
+
+        recipients.forEach(rec => {
+            if (rec.lat != null && rec.lon != null && !isNaN(rec.lat) && !isNaN(rec.lon)) {
+                const marker = L.marker([rec.lat, rec.lon], { /* icon: recipientIcon */ }); // Add icon later
+                marker.bindPopup(`<b>🔴 Người cần:</b> ${rec.name}<br>Ưu tiên: ${rec.priority}<br>Số người: ${rec.count}<br>Hạn giao: ${rec.needs}`);
+                recipientMarkers.addLayer(marker);
+            }
+        });
+        map.addLayer(recipientMarkers);
+        console.log(`${recipients.length} Recipient markers added to cluster group.`);
+
+        // 3. AI Suggested Routes (Lines 🛣️ - Placeholder)
+        // Example: Draw a sample polyline
+        var polyline = L.polyline([
+            [16.0479, 108.2209], // Start (e.g., Hub)
+            [16.0500, 108.2250],
+            [16.0470, 108.2200]  // End (e.g., Recipient/Cluster)
+        ], {color: 'blue', dashArray: '5, 5'}).addTo(map);
+        polyline.bindPopup("🛣️ Tuyến đường AI gợi ý #1");
+        console.log("Placeholder AI route added.");
+
+
+        // --- Map Legend --- 
+        const legend = L.control({position: 'bottomright'});
+
+        legend.onAdd = function (map) {
+            const div = L.DomUtil.create('div', 'info legend');
+            const grades = [
+                { label: 'Người cần cứu trợ', class: 'recipient' },
+                { label: 'Cụm nhu cầu (AI)', class: 'cluster' }, // Use orange for visibility
+                { label: 'Kho/Trạm phân phối', class: 'hub' }
+            ];
+            let legendHtml = '<strong>Chú thích</strong><br>';
+
+            grades.forEach(grade => {
+                legendHtml += `<i style="background:${grade.class === 'recipient' ? 'red' : grade.class === 'cluster' ? 'orange' : 'green'}"></i> ${grade.label}<br>`;
+            });
+
+            // Add route legend
+             legendHtml += `<i style="border-bottom: 3px dashed blue;"></i> Tuyến đường AI gợi ý<br>`;
+
+            div.innerHTML = legendHtml;
+            return div;
+        };
+
+        legend.addTo(map);
+        console.log("Map legend added.");
+
+        // Add click handler for recipient detail buttons
+        document.querySelectorAll('.table .btn-outline-primary').forEach((button, index) => {
+            button.addEventListener('click', () => {
+                // In a real app, find the corresponding recipient marker
+                // For prototype, just pan to a sample location and open popup
+                if (recipients.length > 0) {
+                     const targetRecipient = recipients[index % recipients.length]; // Cycle through recipients for demo
+                     if (targetRecipient && targetRecipient.lat && targetRecipient.lon) {
+                        map.setView([targetRecipient.lat, targetRecipient.lon], 15); // Zoom in
+                        // Find the marker and open popup (tricky without storing marker references)
+                        // For now, just log it
+                        console.log(`Show details for: ${targetRecipient.name}`);
+                        L.popup()
+                         .setLatLng([targetRecipient.lat, targetRecipient.lon])
+                         .setContent(`<b>🔴 ${targetRecipient.name}</b><br>Ưu tiên: ${targetRecipient.priority}<br>Số người: ${targetRecipient.count}`)                         .openOn(map);
+                    }
+                } else {
+                    console.warn("No recipient data to show details for.");
+                }
+            });
+        });
+
+
+        console.log("Demand Admin Dashboard Map Initialized with AI Placeholders.");
+    });
+</script>
+{% endblock %} 

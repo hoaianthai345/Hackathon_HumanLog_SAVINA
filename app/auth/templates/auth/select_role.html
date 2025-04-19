@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title }} - SAVINA</title>
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<!-- Custom Auth CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth_style.css') }}">
+</head>
+<body class="role-body">
+    <a href="{{ url_for('auth.logout') }}" class="role-logout" title="Đăng xuất">
+        <i class="bi bi-box-arrow-right"></i>
+    </a>
+
+    <h2 style="margin-bottom: 30px; color: #333;">Chọn vai trò của bạn</h2>
+
+    <div class="role-container">
+        {% for role in roles %}
+            <a href="{{ role.url }}" class="role-box">
+                <i class="{{ role.icon }}"></i>
+                <div class="role-title">{{ role.name }}</div>
+                <div class="role-description">{{ role.description }}</div>
+            </a>
+        {% else %}
+            <p>Không có vai trò nào được cấu hình.</p>
+        {% endfor %}
+
+        <!-- Example Boxes from reference (can be removed or adapted) -->
+        <!-- <div class="box">
+            <i class="bi bi-truck"></i>
+            <div class="title">On-site Management</div>
+            <div class="description">Manage all Transportation operations efficiently.</div>
+        </div>
+        <div class="box" onclick="window.location.href='{{ url_for('main.dashboard_index') }}'">
+            <i class="bi bi-box"></i>
+            <div class="title">Back-site Management</div>
+            <div class="description">Manage all Warehouse operations efficiently.</div>
+        </div>
+        <div class="box">
+            <i class="bi bi-bar-chart"></i>
+            <div class="title">Inventory Management</div>
+            <div class="description">Manage all Inventory operations efficiently.</div>
+        </div> -->
+    </div>
+</body>
+</html> 

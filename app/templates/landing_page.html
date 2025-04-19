@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAVINA - Kết nối yêu thương, sẻ chia thực phẩm</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing_page.css') }}">
+</head>
+<body data-bs-spy="scroll" data-bs-target="#navbarNav" data-bs-offset="70" tabindex="0">
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top shadow-sm" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#" style="color: #722f37;">
+                SAVINA
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#hero">Trang chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">Về chúng tôi</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">Cách hoạt động</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#get-involved">Tham gia</a>
+                    </li>
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-wine btn-sm btn-nav-action" href="{{ url_for('donations.register_donation') }}">Quyên góp ngay</a>
+                    </li>
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-outline-secondary btn-sm btn-nav-action" href="{{ url_for('auth.login') }}">Đăng nhập</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="hero" style="background-image: url('{{ url_for('static', filename='img/landing-banner.png') }}');">
+        <div class="container">
+            <h1 class="display-4">Chung tay giảm lãng phí, lan tỏa yêu thương</h1>
+            <p class="lead col-lg-8 mx-auto">SAVINA kết nối nguồn thực phẩm an toàn, còn hạn sử dụng từ các nhà hàng, siêu thị, cá nhân đến cộng đồng yếu thế, người cơ nhỡ một cách nhanh chóng và minh bạch.</p>
+            <a href="#get-involved" class="btn btn-wine btn-lg">Tham gia cùng chúng tôi</a>
+            <a href="{{ url_for('main.dashboard_index') }}" class="btn btn-outline-secondary btn-lg ms-2">Vào Dashboard</a>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section bg-white" id="about">
+        <div class="container">
+            <h2 class="section-title">Vấn đề & Giải pháp</h2>
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-4 mb-md-0">
+                    <h4>Thực trạng đáng báo động</h4>
+                    <p>Hàng tấn thực phẩm bị lãng phí mỗi ngày trong khi rất nhiều người dân, đặc biệt là người yếu thế, lao động nghèo, người vô gia cư đang thiếu ăn. SAVINA ra đời để giải quyết nghịch lý này.</p>
+                    <ul>
+                        <li>Kết nối hiệu quả nguồn cung và cầu thực phẩm.</li>
+                        <li>Giảm thiểu tác động môi trường từ rác thải thực phẩm.</li>
+                        <li>Xây dựng cộng đồng nhân ái, sẻ chia.</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <img src="{{ url_for('static', filename='img/ChatGPT Image Apr 19, 2025, 12_18_17 PM.png') }}" alt="Food donation illustration" class="img-fluid rounded shadow-sm">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Role Selection Section (for testing) -->
+    <section class="section bg-white" id="role-selection">
+        <div class="container">
+            <h2 class="section-title">Truy cập nhanh (Test)</h2>
+             <div class="role-container-landing d-flex flex-wrap justify-content-center gap-4">
+                 {% for role in roles %}
+                    {# Check if the role name matches the ones we want to link to demand_admin or supply_admin #}
+                    {% set target_url = role.url %}
+                    {% if role.name == 'QTV Demand' or role.name == 'QTV Distribution' %}
+                        {% set target_url = url_for('demand_admin.dashboard') %}
+                    {% elif role.name == 'QTV Supply & Inventory' %}
+                        {% set target_url = url_for('supply_admin.dashboard') %}
+                    {% endif %}
+
+                    <a href="{{ target_url }}" class="role-box-landing">
+                        <i class="{{ role.icon }}"></i>
+                        <div class="role-title">{{ role.name }}</div>
+                        <div class="role-description">{{ role.description }}</div>
+                    </a>
+                {% else %}
+                    <p>Không có vai trò nào được cấu hình.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">SAVINA Hoạt động như thế nào?</h2>
+            <div class="row">
+                <div class="col-lg-2 col-md-4 col-6 how-it-works-item">
+                    <i class="bi bi-shop feature-icon"></i>
+                    <h5>Tiếp nhận</h5>
+                    <p>Nhà hảo tâm đăng ký tặng thực phẩm qua web/app.</p>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6 how-it-works-item">
+                    <i class="bi bi-clipboard-check feature-icon"></i>
+                    <h5>Ghi nhận</h5>
+                    <p>Tình nguyện viên hoặc hệ thống ghi nhận nhu cầu.</p>
+                </div>
+                 <div class="col-lg-2 col-md-4 col-6 how-it-works-item">
+                     <i class="bi bi-cpu feature-icon"></i>
+                    <h5>Xử lý AI</h5>
+                    <p>Gom cụm, ưu tiên, gợi ý tuyến đường tối ưu.</p>
+                </div>
+                 <div class="col-lg-2 col-md-4 col-6 how-it-works-item">
+                    <i class="bi bi-truck feature-icon"></i>
+                    <h5>Phân phối</h5>
+                    <p>Shipper/TNV giao hàng tận nơi hoặc điểm hẹn.</p>
+                </div>
+                 <div class="col-lg-2 col-md-4 col-6 how-it-works-item">
+                    <i class="bi bi-camera feature-icon"></i>
+                    <h5>Xác nhận</h5>
+                    <p>Chụp ảnh, quét QR để xác nhận giao thành công.</p>
+                </div>
+                 <div class="col-lg-2 col-md-4 col-6 how-it-works-item">
+                     <i class="bi bi-graph-up-arrow feature-icon"></i>
+                    <h5>Minh bạch</h5>
+                    <p>Theo dõi real-time, báo cáo hiệu quả hoạt động.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Get Involved Section -->
+    <section class="section bg-light" id="get-involved">
+        <div class="container">
+            <h2 class="section-title">Tham gia cùng SAVINA</h2>
+            <div class="row">
+                <div class="col-md-4 get-involved-item">
+                    <i class="bi bi-building feature-icon"></i>
+                    <h5>Nhà hàng / Siêu thị / Cá nhân</h5>
+                    <p>Đăng ký trở thành đối tác cung cấp thực phẩm dư thừa an toàn.</p>
+                    <a href="{{ url_for('donations.register_donation') }}" class="btn btn-outline-secondary">Đăng ký quyên góp</a>
+                </div>
+                <div class="col-md-4 get-involved-item">
+                    <i class="bi bi-person-heart feature-icon"></i>
+                    <h5>Tình nguyện viên</h5>
+                    <p>Tham gia ghi nhận nhu cầu, điều phối hoặc vận chuyển thực phẩm.</p>
+                    <a href="{{ url_for('volunteer.dashboard') }}" class="btn btn-outline-secondary">Tìm hiểu thêm / Vào DB</a>
+                </div>
+                <div class="col-md-4 get-involved-item">
+                     <i class="bi bi-house-heart feature-icon"></i>
+                    <h5>Người nhận hỗ trợ</h5>
+                    <p>Tìm hiểu cách đăng ký nhận thực phẩm hoặc tìm đến các điểm hỗ trợ.</p>
+                     <a href="#" class="btn btn-outline-secondary">Xem hướng dẫn</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final Call to Action -->
+    <section class="section text-center" id="cta">
+        <div class="container">
+            <h2>Sẵn sàng tạo nên sự khác biệt?</h2>
+            <p class="lead col-lg-8 mx-auto">Mỗi hành động nhỏ đều góp phần xây dựng một cộng đồng tốt đẹp hơn. Hãy cùng SAVINA sẻ chia thực phẩm, lan tỏa yêu thương.</p>
+            <a href="{{ url_for('donations.register_donation') }}" class="btn btn-wine btn-lg mt-3">Quyên góp / Đăng ký</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container text-center">
+            <p>&copy; 2024 SAVINA. All Rights Reserved.</p>
+            <p>
+                <a href="#">Chính sách bảo mật</a> | <a href="#">Điều khoản sử dụng</a> | <a href="{{ url_for('info.about') }}">Liên hệ</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

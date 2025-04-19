@@ -1,0 +1,176 @@
+/* Adjusted CSS from Tham_khao/homepage.css */
+body {
+    background-color: #f8f9fa; /* Light grey background */
+    font-family: sans-serif; /* Or choose a Bootstrap font */
+}
+
+.sidebar {
+    width: 240px; /* Slightly wider */
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: white;
+    padding: 0;
+    border-right: 1px solid #dee2e6;
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+}
+.sidebar::-webkit-scrollbar { /* Webkit */
+    display: none;
+}
+
+.sidebar-header {
+    padding: 15px;
+    border-bottom: 1px solid #5a252d; /* Darker border for contrast */
+    background-color: #722f37; /* Wine Red */
+    color: white; /* White text for readability */
+}
+
+.sidebar-header .profile-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.sidebar-header .user-id {
+    font-size: 0.8em;
+    color: #f8d7da; /* Lighter red/pink for subtitle */
+}
+
+.sidebar-content {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 73px); /* Adjust based on header height */
+}
+
+.main-content {
+    margin-left: 240px; /* Match sidebar width */
+    padding: 0;
+    background-color: #f8f9fa;
+    transition: margin-left 0.3s ease;
+}
+
+.header {
+    padding: 10px 20px;
+    background-color: white;
+    border-bottom: 1px solid #dee2e6;
+    min-height: 60px; /* Ensure header height */
+}
+
+.search-box {
+    background-color: #f1f3f5; /* Slightly lighter search */
+    border-radius: 20px;
+    padding: 6px 12px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.search-box input {
+    background: transparent;
+    border: none;
+    width: 100%;
+    padding: 5px 5px;
+    font-size: 0.9em;
+}
+
+.search-box input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.header-icons .btn {
+    color: #6c757d;
+}
+.header-icons .btn:hover {
+    color: #000;
+}
+
+/* Sidebar Navigation */
+.nav-item {
+    margin-bottom: 2px;
+}
+
+.nav-link {
+    color: #343a40;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    font-size: 0.95em;
+    border-radius: 5px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-link:hover {
+    background-color: #e9ecef;
+    color: #000;
+}
+.nav-link.active {
+    background-color: #722f37; /* Wine Red */
+    color: white;
+    font-weight: 500;
+}
+
+.nav-link i {
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+    font-size: 1.1em;
+}
+
+/* Style for section headers */
+.nav-section-header {
+    font-weight: 600;
+    color: #6c757d;
+    padding: 10px 10px 5px 10px;
+    margin-top: 15px;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Style for bottom menu group */
+.bottom-menu-group {
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid #dee2e6;
+}
+
+.content-area {
+    padding: 20px;
+    /* Removed fixed height and overflow scroll, let content flow naturally */
+}
+
+/* Make sidebar responsive */
+@media (max-width: 767.98px) {
+    .sidebar {
+        /* Hide sidebar by default on small screens */
+        /* Handled by Offcanvas */
+        /* width: 0; */
+        /* padding: 0; */
+        /* border: none; */
+        display: none; /* Hide fixed sidebar */
+    }
+    .main-content {
+        margin-left: 0;
+    }
+    .search-box {
+         /* Optional: Adjust search box */
+    }
+}
+
+/* Profile Image in Header (if used) */
+.profile-section .profile-image {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    object-fit: cover;
+}
+
+/* Alert styling (Bootstrap defaults are usually fine) */
+.alert {
+    margin-bottom: 1rem;
+} 

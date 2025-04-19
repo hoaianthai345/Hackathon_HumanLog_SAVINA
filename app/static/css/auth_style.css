@@ -1,0 +1,221 @@
+/* Combined and adapted styles from login.css and role.css */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* --- Login Page Styles --- */
+
+.login-body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  height: 100vh;
+  overflow: hidden; /* Prevent scrolling on login page */
+}
+
+.login-container {
+  display: grid;
+  height: 100vh;
+  grid-template-columns: 1fr 1.5fr; /* Adjust column ratio if needed */
+}
+
+.login-left-section {
+  padding: 50px;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-branding h1 {
+  color: #722f37; /* Use the consistent wine red */
+  font-size: 28px; /* Adjusted size */
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.login-welcome-text {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.login-form .input-group {
+  margin-bottom: 20px;
+}
+
+.login-form .input-group input[type="email"],
+.login-form .input-group input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.login-form .input-group input:focus {
+  border-color: #722f37;
+  outline: none;
+  box-shadow: 0 0 5px rgba(114, 47, 55, 0.4);
+}
+
+.login-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  font-size: 13px;
+}
+
+.login-options .form-check-input:checked {
+    background-color: #722f37;
+    border-color: #722f37;
+}
+
+.login-options .forgot-password {
+  text-decoration: none;
+  color: #722f37;
+}
+
+.login-options .forgot-password:hover {
+  text-decoration: underline;
+}
+
+.login-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.login-buttons .btn-login {
+  background-color: #722f37;
+  border-color: #722f37;
+  color: #fff;
+  padding: 10px 20px;
+  flex-grow: 1; /* Make buttons take equal space */
+}
+
+.login-buttons .btn-login:hover {
+  background-color: #5a252d;
+  border-color: #5a252d;
+}
+
+.login-buttons .btn-signup {
+  background-color: transparent;
+  color: #722f37;
+  border: 2px solid #722f37;
+  padding: 10px 20px;
+   flex-grow: 1;
+}
+
+.login-buttons .btn-signup:hover {
+  background-color: #722f37;
+  color: #fff;
+}
+
+.login-right-section {
+  /* Use the specified background image */
+  background-image: url('../img/vt_311429.webp');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: flex;
+  align-items: flex-start; /* Align nav to top */
+  justify-content: flex-end; /* Align nav to right */
+  padding: 20px;
+}
+
+/* Removed navigation from login page as it's unusual */
+/* .login-navigation ... */
+
+/* --- Role Selection Page Styles --- */
+
+.role-body {
+    display: flex;
+    flex-direction: column; /* Stack container and logout */
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+
+.role-container {
+    display: flex;
+    gap: 30px; /* Khoảng cách giữa các box */
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+.role-logout {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 8px;
+    color: #333;
+    border: 1px solid transparent;
+}
+.role-logout i {
+    font-size: 24px;
+}
+
+.role-logout:hover{
+    color: #722f37;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    border-radius: 5px;
+}
+
+.role-box {
+    background-color: #722f37; /* Wine red background */
+    color: white;
+    width: 220px;
+    height: 160px; /* Chiều cao ban đầu */
+    padding: 25px;
+    border-radius: 10px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center content vertically */
+    align-items: center;
+    text-decoration: none; /* Remove underline from link */
+}
+
+.role-box:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.role-box i {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.role-box .role-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.role-box .role-description {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+/* Error message styling (using Bootstrap alert classes) */
+.alert-danger {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+} 

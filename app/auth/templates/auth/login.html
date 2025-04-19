@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }} - SAVINA</title>
+  <!-- Bootstrap CSS (optional, if using form styling) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom Auth CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth_style.css') }}">
+</head>
+<body class="login-body">
+  <div class="login-container">
+    <div class="login-left-section">
+      <div class="login-branding">
+        <h1>SAVINA</h1>
+      </div>
+      <p class="login-welcome-text">Chào mừng trở lại! Vui lòng đăng nhập.</p>
+
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category or 'warning' }} alert-dismissible fade show mb-3" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form class="login-form" method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="input-group">
+          {{ form.email.label(class="form-label visually-hidden") }} <!-- Hide label, use placeholder -->
+          {{ form.email(class="form-control", placeholder="Địa chỉ Email") }}
+          {% for error in form.email.errors %}
+            <span class="text-danger" style="font-size: 0.8em;">{{ error }}</span>
+          {% endfor %}
+        </div>
+        <div class="input-group">
+          {{ form.password.label(class="form-label visually-hidden") }}
+          {{ form.password(class="form-control", placeholder="Mật khẩu") }}
+           {% for error in form.password.errors %}
+            <span class="text-danger" style="font-size: 0.8em;">{{ error }}</span>
+          {% endfor %}
+        </div>
+        <div class="login-options">
+          <div class="form-check">
+            {{ form.remember_me(class="form-check-input") }}
+            {{ form.remember_me.label(class="form-check-label") }}
+          </div>
+          <a href="#" class="forgot-password">Quên mật khẩu?</a> <!-- Link to password reset later -->
+        </div>
+        <div class="login-buttons">
+          {{ form.submit(class="btn btn-login") }}
+          <a href="#" class="btn btn-signup">Đăng ký</a> <!-- Link to registration later -->
+        </div>
+      </form>
+    </div>
+
+    <div class="login-right-section">
+      <!-- Background image applied via CSS -->
+    </div>
+  </div>
+  <!-- Bootstrap JS (needed for alerts) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

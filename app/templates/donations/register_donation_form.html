@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block header_title %}Đăng ký Quyên góp{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-sm mt-4 mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="bi bi-box2-heart-fill me-2"></i>Đăng ký Quyên góp</h4>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted mb-4">Cảm ơn tấm lòng hảo tâm của bạn! Vui lòng điền thông tin quyên góp dưới đây.</p>
+
+                    <form action="#" method="POST" enctype="multipart/form-data"> {# Action will point to the processing route later #}
+                        {# --- 1. Thông tin người quyên góp --- #}
+                        <h5><i class="bi bi-person-fill me-2"></i>1. Thông tin người quyên góp</h5>
+                        <hr class="mt-1 mb-3">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="donor_name" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="donor_name" name="donor_name" required placeholder="Nguyễn Văn A">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="donor_email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="donor_email" name="donor_email" placeholder="example@email.com">
+                                <div class="form-text">Để gửi xác nhận và thông tin liên lạc.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="donor_phone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="donor_phone" name="donor_phone" required placeholder="09xxxxxxxx">
+                                <div class="form-text">Để tình nguyện viên liên hệ tiếp nhận.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="donor_address" class="form-label">Địa chỉ</label>
+                                <textarea class="form-control" id="donor_address" name="donor_address" rows="2" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"></textarea>
+                                <div class="form-text">Nếu bạn chọn "Cần người đến lấy", vui lòng ghi rõ địa chỉ.</div>
+                            </div>
+                        </div>
+
+                        {# --- 2. Thông tin đóng góp --- #}
+                        <h5><i class="bi bi-gift-fill me-2"></i>2. Thông tin đóng góp</h5>
+                        <hr class="mt-1 mb-3">
+                         <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="donation_type" class="form-label">Loại đóng góp <span class="text-danger">*</span></label>
+                                <select class="form-select" id="donation_type" name="donation_type" required>
+                                    <option selected disabled value="">-- Chọn loại --</option>
+                                    <option value="food">Thực phẩm</option>
+                                    <option value="supplies">Đồ dùng thiết yếu</option>
+                                    <option value="cash">Tiền mặt</option>
+                                    <option value="other">Khác</option>
+                                </select>
+                            </div>
+                             <div class="col-md-6">
+                                <label for="donation_quantity" class="form-label">Số lượng / Giá trị ước tính</label>
+                                <input type="text" class="form-control" id="donation_quantity" name="donation_quantity" placeholder="Ví dụ: 20 thùng, 5kg, 500,000 VND">
+                             </div>
+                             <div class="col-12">
+                                <label for="donation_description" class="form-label">Mô tả chi tiết <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="donation_description" name="donation_description" rows="3" required placeholder="Ví dụ: 20 thùng mì Hảo Hảo, 5kg gạo ST25 còn hạn sử dụng, 30 bộ quần áo trẻ em..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label d-block">Hình thức giao hàng <span class="text-danger">*</span></label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="delivery_method" id="delivery_self" value="self" required checked>
+                                    <label class="form-check-label" for="delivery_self">Tự gửi đến điểm tập kết</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="delivery_method" id="delivery_pickup" value="pickup" required>
+                                    <label class="form-check-label" for="delivery_pickup">Cần người đến lấy</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="preferred_time" class="form-label">Thời gian mong muốn gửi/lấy</label>
+                                <input type="datetime-local" class="form-control" id="preferred_time" name="preferred_time">
+                                <div class="form-text">Nếu có yêu cầu cụ thể về thời gian.</div>
+                            </div>
+                        </div>
+
+                        {# --- 3. Tệp đính kèm --- #}
+                        <h5><i class="bi bi-paperclip me-2"></i>3. Tệp đính kèm (tuỳ chọn)</h5>
+                         <hr class="mt-1 mb-3">
+                         <div class="mb-4">
+                            <label for="donation_image" class="form-label">Ảnh minh họa hàng hóa</label>
+                            <input class="form-control" type="file" id="donation_image" name="donation_image" accept="image/*">
+                            <div class="form-text">Giúp chúng tôi và tình nguyện viên hình dung rõ hơn về vật phẩm.</div>
+                        </div>
+                         <div class="mb-4">
+                            <label for="donation_receipt" class="form-label">Biên nhận / Hoá đơn</label>
+                            <input class="form-control" type="file" id="donation_receipt" name="donation_receipt" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                             <div class="form-text">Nếu bạn muốn cung cấp để tiện theo dõi.</div>
+                        </div>
+
+                         {# --- 4. Cam kết & nút gửi --- #}
+                         <h5><i class="bi bi-check-circle-fill me-2"></i>4. Xác nhận</h5>
+                         <hr class="mt-1 mb-3">
+                         <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" value="" id="commitment_check" name="commitment_check" required>
+                            <label class="form-check-label" for="commitment_check">
+                                Tôi cam kết các thông tin cung cấp là đúng sự thật và vật phẩm quyên góp (nếu là thực phẩm) đảm bảo an toàn, còn hạn sử dụng.
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-send-fill me-2"></i>Gửi đăng ký Quyên góp
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    // Add any form-specific JS if needed (e.g., conditional fields)
+    console.log("Donation registration form loaded.");
+</script>
+{% endblock %} 

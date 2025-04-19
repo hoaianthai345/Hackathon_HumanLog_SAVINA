@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block header_title %}Bảng điều khiển Tình nguyện viên{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Row -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Xin chào, {{ volunteer['name'] }}!</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{{ url_for('volunteer.add_recipient') }}" class="btn btn-sm btn-success">
+                <i class="bi bi-plus-circle-fill me-1"></i> Ghi nhận người cần giúp
+            </a>
+            <!-- Add other quick actions if needed -->
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row g-4">
+
+        <!-- Left Column (Tasks & Map Placeholder) -->
+        <div class="col-lg-8">
+            <!-- Assigned Tasks -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-list-task me-2"></i>Nhiệm vụ hôm nay</h5>
+                </div>
+                <div class="card-body">
+                    {% if assigned_tasks %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Người nhận</th>
+                                    <th>Địa chỉ (Ước lượng)</th>
+                                    <th>Đồ ăn</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in assigned_tasks %}
+                                <tr>
+                                    <td>{{ task.recipient.nickname }}</td>
+                                    <td>
+                                        <a href="https://www.google.com/maps/search/?api=1&query={{ task.recipient.latitude }},{{ task.recipient.longitude }}" target="_blank" title="Mở bản đồ">
+                                            {{ task.recipient.latitude|round(4) }}, {{ task.recipient.longitude|round(4) }}
+                                            <i class="bi bi-geo-alt-fill text-muted ms-1"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {{ task.donation_item.quantity }} {{ task.donation_item.unit }} {{ task.donation_item.category }}
+                                        {% if task.donation_item.expiry_date %}
+                                        <small class="text-muted">(HSD: {{ task.donation_item.expiry_date.strftime('%d/%m') }})</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <!-- Placeholder Buttons - Link to detail/action routes later -->
+                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Xem chi tiết"><i class="bi bi-eye"></i></a>
+                                        <a href="#" class="btn btn-sm btn-outline-success ms-1" title="Xác nhận đã giao"><i class="bi bi-check-circle"></i></a>
+                                        <a href="#" class="btn btn-sm btn-outline-danger ms-1" title="Báo cáo thất bại"><i class="bi bi-x-circle"></i></a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">Không có nhiệm vụ nào được giao hôm nay.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Map Placeholder -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                     <h5 class="mb-0"><i class="bi bi-map me-2"></i>Bản đồ tuyến đường (Sắp có)</h5>
+                </div>
+                <div class="card-body text-center text-muted">
+                    <p>Khu vực này sẽ hiển thị bản đồ với các điểm giao hàng được gợi ý.</p>
+                    <i class="bi bi-geo-alt" style="font-size: 3rem;"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column (Info, History, Gamification, Notifications) -->
+        <div class="col-lg-4">
+             <!-- Personal Info -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Thông tin TNV</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text mb-1"><strong>Tên:</strong> {{ volunteer['name'] }}</p>
+                    <p class="card-text mb-1"><strong>Vai trò:</strong> <span class="badge bg-info">{{ volunteer['volunteer_role'].replace('_', ' ').title() }}</span></p>
+                    <p class="card-text mb-0"><strong>Khu vực:</strong> {{ volunteer['area'] or 'Chưa cập nhật' }}</p>
+                </div>
+            </div>
+
+            <!-- Gamification -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                     <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Thành tích</h5>
+                </div>
+                <div class="card-body">
+                     <p class="card-text mb-1"><strong>Điểm đóng góp:</strong> {{ "%.1f"|format(gamification.rating) }} <i class="bi bi-star-fill text-warning"></i></p>
+                     <p class="card-text mb-1"><strong>Tổng nhiệm vụ:</strong> {{ gamification.task_count }}</p>
+                     <p class="card-text text-muted"><small>Huy hiệu & Xếp hạng (Sắp có)</small></p>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card shadow-sm mb-4">
+                 <div class="card-header">
+                     <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Hoạt động gần đây</h5>
+                 </div>
+                 <ul class="list-group list-group-flush">
+                    {% if recent_activity %}
+                        {% for activity in recent_activity %}
+                            <li class="list-group-item list-group-item-action small">
+                            {% if isinstance(activity, Delivery) %}
+                                {% if activity.status == DeliveryStatus.DELIVERED %}
+                                    <i class="bi bi-check-circle-fill text-success me-1"></i> Giao thành công cho <strong>{{ activity.recipient.nickname }}</strong>
+                                    <span class="text-muted float-end">{{ activity.delivered_at.strftime('%H:%M %d/%m') }}</span>
+                                {% elif activity.status == DeliveryStatus.FAILED %}
+                                    <i class="bi bi-x-circle-fill text-danger me-1"></i> Giao thất bại tới <strong>{{ activity.recipient.nickname }}</strong>
+                                     <span class="text-muted float-end">{{ activity.delivered_at.strftime('%H:%M %d/%m') if activity.delivered_at else 'N/A' }}</span>
+                                {% endif %}
+                            {% elif isinstance(activity, VolunteerReport) %}
+                                <i class="bi bi-clipboard-plus-fill text-info me-1"></i> Ghi nhận <strong>{{ activity.recipient.nickname }}</strong>
+                                <span class="text-muted float-end">{{ activity.timestamp.strftime('%H:%M %d/%m') }}</span>
+                            {% endif %}
+                            </li>
+                        {% endfor %}
+                        <li class="list-group-item text-center"><a href="#" class="text-decoration-none small">Xem tất cả lịch sử</a></li> <!-- Link to history page later -->
+                     {% else %}
+                        <li class="list-group-item text-muted text-center">Chưa có hoạt động nào.</li>
+                    {% endif %}
+                 </ul>
+            </div>
+
+            <!-- Notifications Placeholder -->
+             <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-bell me-2"></i>Thông báo</h5>
+                </div>
+                <div class="card-body text-center text-muted">
+                    <p>Chưa có thông báo mới.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %} 

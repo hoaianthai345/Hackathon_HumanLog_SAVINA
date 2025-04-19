@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block header_title %}Tình nguyện viên{% endblock %}
+
+{% block head_extra %}
+{{ super() }}
+{# Leaflet CSS for map placeholder #}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .map-placeholder-sm {
+        height: 250px; /* Smaller map for dashboard */
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        border-radius: .375rem;
+        margin-bottom: 1rem;
+        font-style: italic;
+        border: 1px solid #dee2e6;
+    }
+    .achievement-badge {
+        font-size: 0.8rem;
+        margin-right: 0.3rem;
+        margin-bottom: 0.3rem;
+    }
+    .task-card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .task-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    }
+    .progress-bar {
+        background-color: #e9ecef; /* Light background for progress */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {# Page Header - Greeting #}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        {# Replace with dynamic name later #}
+        <h1 class="h2">Chào mừng trở lại, Nguyễn Văn Tình!</h1> 
+        <span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Hoạt động</span>
+    </div>
+
+    <div class="row">
+        {# Left Column - Tasks & Map #}
+        <div class="col-lg-8 mb-4">
+
+            {# Quick Stats/Gamification #}
+            <div class="row g-3 mb-4">
+                 <div class="col-sm-6 col-lg-3">
+                     <div class="card card-body text-center h-100 shadow-sm border-primary">
+                         <i class="bi bi-star-fill fs-2 text-warning mb-2"></i>
+                         <h6 class="card-subtitle mb-1 text-muted">Điểm Cống hiến</h6>
+                         <p class="card-text fs-4 fw-bold">1,250</p>
+                     </div>
+                 </div>
+                 <div class="col-sm-6 col-lg-3">
+                    <div class="card card-body text-center h-100 shadow-sm border-info">
+                        <i class="bi bi-list-task fs-2 text-info mb-2"></i>
+                         <h6 class="card-subtitle mb-1 text-muted">Nhiệm vụ Tuần</h6>
+                         <p class="card-text fs-4 fw-bold">5/8</p>
+                         <div class="progress mt-1" style="height: 5px;">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: 62.5%;" aria-valuenow="5" aria-valuemin="0" aria-valuemax="8"></div>
+                        </div>
+                    </div>
+                </div>
+                 <div class="col-sm-6 col-lg-3">
+                    <div class="card card-body text-center h-100 shadow-sm border-success">
+                        <i class="bi bi-award-fill fs-2 text-success mb-2"></i>
+                        <h6 class="card-subtitle mb-1 text-muted">Danh hiệu</h6>
+                        <p class="card-text fw-bold">Chiến binh Năng nổ</p>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                     <div class="card card-body text-center h-100 shadow-sm">
+                         <h6 class="card-subtitle mb-2 text-muted">Huy hiệu</h6>
+                         <div>
+                            <span class="badge bg-secondary achievement-badge" title="Giao hàng nhanh"><i class="bi bi-lightning-fill"></i> Nhanh</span>
+                            <span class="badge bg-secondary achievement-badge" title="Hỗ trợ tích cực"><i class="bi bi-heart-fill"></i> Tích cực</span>
+                            <span class="badge bg-secondary achievement-badge" title="Phản hồi tốt"><i class="bi bi-hand-thumbs-up-fill"></i> Tốt</span>
+                            {# Add more badges #}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {# Task List Tabs #}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="taskTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="new-tasks-tab" data-bs-toggle="tab" data-bs-target="#new-tasks" type="button" role="tab" aria-controls="new-tasks" aria-selected="true"><i class="bi bi-stars me-1"></i> Nhiệm vụ mới (2)</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="inprogress-tasks-tab" data-bs-toggle="tab" data-bs-target="#inprogress-tasks" type="button" role="tab" aria-controls="inprogress-tasks" aria-selected="false"><i class="bi bi-hourglass-split me-1"></i> Đang thực hiện (1)</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="completed-tasks-tab" data-bs-toggle="tab" data-bs-target="#completed-tasks" type="button" role="tab" aria-controls="completed-tasks" aria-selected="false"><i class="bi bi-check2-circle me-1"></i> Đã hoàn thành (5)</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="taskTabContent">
+                        {# New Tasks Pane #}
+                        <div class="tab-pane fade show active" id="new-tasks" role="tabpanel" aria-labelledby="new-tasks-tab">
+                             <div class="list-group">
+                                {# Sample New Task 1 #}
+                                <a href="#" class="list-group-item list-group-item-action task-card mb-2 shadow-sm">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1"><i class="bi bi-truck text-primary me-2"></i>Giao hàng P. Hòa Khánh Bắc</h5>
+                                        <small class="text-muted">Ưu tiên: Cao</small>
+                                    </div>
+                                    <p class="mb-1">Giao 5 gói cứu trợ tại địa chỉ 123 Nguyễn Văn Linh.</p>
+                                    <small class="text-muted">Yêu cầu trước: 16:00 Hôm nay</small>
+                                     <div class="mt-2">
+                                        <button class="btn btn-sm btn-success me-2"><i class="bi bi-check-lg"></i> Nhận nhiệm vụ</button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-geo-alt"></i> Xem map</button>
+                                    </div>
+                                </a>
+                                {# Sample New Task 2 #}
+                                <a href="#" class="list-group-item list-group-item-action task-card mb-2 shadow-sm">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1"><i class="bi bi-clipboard-check text-info me-2"></i>Ghi nhận KTX DMC</h5>
+                                        <small class="text-muted">Ưu tiên: Trung bình</small>
+                                    </div>
+                                    <p class="mb-1">Xác minh nhu cầu và số lượng người cần hỗ trợ tại KTX DMC. Liên hệ Chị Lan (09xxxx).</p>
+                                    <small class="text-muted">Hạn chót: Ngày mai</small>
+                                     <div class="mt-2">
+                                        <button class="btn btn-sm btn-success me-2"><i class="bi bi-check-lg"></i> Nhận nhiệm vụ</button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-geo-alt"></i> Xem map</button>
+                                    </div>
+                                </a>
+                                 {# Add more new tasks #}
+                            </div>
+                        </div>
+                        {# In Progress Tasks Pane #}
+                        <div class="tab-pane fade" id="inprogress-tasks" role="tabpanel" aria-labelledby="inprogress-tasks-tab">
+                            <div class="list-group">
+                                {# Sample In Progress Task #}
+                                <div class="list-group-item task-card mb-2 shadow-sm">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1"><i class="bi bi-geo-alt-fill text-warning me-2"></i>Điều phối Chợ Hòa Mỹ</h5>
+                                         <small class="text-muted">Trạng thái: Đang chờ TNV</small>
+                                    </div>
+                                    <p class="mb-1">Sắp xếp điểm hẹn và thông báo cho người nhận tại khu vực Chợ Hòa Mỹ. Thời gian: 14:00 - 15:00.</p>
+                                    <small class="text-muted">Đã nhận: 2 giờ trước</small>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-primary me-2"><i class="bi bi-check-circle-fill"></i> Xác nhận hoàn thành</button>
+                                        <button class="btn btn-sm btn-outline-danger me-2"><i class="bi bi-exclamation-octagon"></i> Báo cáo sự cố</button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-geo-alt"></i> Xem map</button>
+                                    </div>
+                                </div>
+                                 {# Add more in-progress tasks #}
+                            </div>
+                        </div>
+                        {# Completed Tasks Pane #}
+                        <div class="tab-pane fade" id="completed-tasks" role="tabpanel" aria-labelledby="completed-tasks-tab">
+                             <div class="list-group">
+                                {# Sample Completed Task #}
+                                <div class="list-group-item list-group-item-light task-card mb-2 shadow-sm">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1 text-muted"><i class="bi bi-check-all me-2"></i>Giao hàng Q. Sơn Trà</h5>
+                                        <small class="text-muted">Hoàn thành: Hôm qua</small>
+                                    </div>
+                                    <p class="mb-1 text-muted">Đã giao thành công 3 gói cứu trợ.</p>
+                                    <small class="text-muted">Điểm nhận được: +20</small>
+                                </div>
+                                {# Add more completed tasks #}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             {# Route Map Placeholder #}
+            <div class="card shadow-sm d-none d-lg-block"> {# Hide on smaller screens if needed #}
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-map-fill me-2"></i>Bản đồ nhiệm vụ</h5>
+                </div>
+                <div class="card-body p-2">
+                    <div class="map-placeholder-sm">
+                        [Bản đồ hiển thị vị trí các nhiệm vụ hiện tại]
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Right Column - Profile, Activity, Notifications #}
+        <div class="col-lg-4">
+            {# Volunteer Info #}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-person-badge-fill me-2"></i>Thông tin Tình nguyện viên</h5>
+                </div>
+                <div class="card-body text-center">
+                    <img src="{{ url_for('static', filename='img/default-avatar.png') }}" alt="Avatar" class="rounded-circle mb-3" width="80" height="80">
+                    <h6>Nguyễn Văn Tình</h6> {# Replace with dynamic data #}
+                    <p class="text-muted mb-1 small">Vai trò: Giao hàng & Ghi nhận</p>
+                    <p class="text-muted small">Khu vực: Quận Liên Chiểu, Đà Nẵng</p>
+                    <a href="#" class="btn btn-outline-secondary btn-sm">Xem & Chỉnh sửa hồ sơ</a>
+                </div>
+            </div>
+
+            {# Recent Activity #}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Hoạt động gần đây</h5>
+                </div>
+                <div class="list-group list-group-flush" style="max-height: 250px; overflow-y: auto;">
+                    <a href="#" class="list-group-item list-group-item-action py-2">
+                        <div class="d-flex w-100 justify-content-between">
+                            <p class="mb-1 small">Hoàn thành giao hàng #T001</p>
+                            <small class="text-muted">1h</small>
+                        </div>
+                    </a>
+                     <a href="#" class="list-group-item list-group-item-action py-2">
+                        <div class="d-flex w-100 justify-content-between">
+                            <p class="mb-1 small">Nhận nhiệm vụ ghi nhận KTX DMC</p>
+                             <small class="text-muted">3h</small>
+                        </div>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action py-2">
+                        <div class="d-flex w-100 justify-content-between">
+                            <p class="mb-1 small">Nhận huy hiệu "Giao hàng nhanh"</p>
+                             <small class="text-muted">1N</small>
+                        </div>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action py-2">
+                        <div class="d-flex w-100 justify-content-between">
+                            <p class="mb-1 small">Cập nhật khu vực hoạt động</p>
+                             <small class="text-muted">2N</small>
+                        </div>
+                    </a>
+                    {# Add more activities #}
+                </div>
+                 <div class="card-footer text-center py-1">
+                     <a href="#" class="small link-secondary">Xem tất cả</a>
+                 </div>
+            </div>
+
+            {# Notifications #}
+            <div class="card shadow-sm">
+                <div class="card-header">
+                     <h5 class="mb-0"><i class="bi bi-bell-fill me-2"></i>Thông báo</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                     <a href="#" class="list-group-item list-group-item-action list-group-item-warning py-2">
+                        <div class="d-flex w-100 justify-content-between">
+                            <p class="mb-1 small"><strong>Khẩn cấp:</strong> Nhiệm vụ mới tại Q. Hải Châu</p>
+                            <small class="text-muted">5p</small>
+                        </div>
+                    </a>
+                     <a href="#" class="list-group-item list-group-item-action list-group-item-success py-2">
+                         <div class="d-flex w-100 justify-content-between">
+                            <p class="mb-1 small">Bạn được cộng 50 điểm cống hiến!</p>
+                             <small class="text-muted">15p</small>
+                        </div>
+                    </a>
+                     <a href="#" class="list-group-item list-group-item-action list-group-item-info py-2">
+                         <div class="d-flex w-100 justify-content-between">
+                            <p class="mb-1 small">Lịch giao hàng tuần tới đã cập nhật.</p>
+                             <small class="text-muted">1N</small>
+                        </div>
+                    </a>
+                    {# Add more notifications #}
+                </div>
+                <div class="card-footer text-center py-1">
+                     <a href="#" class="small link-secondary">Xem tất cả</a>
+                 </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    console.log("Volunteer Dashboard Loaded");
+    // Placeholder for map initialization if needed
+    try {
+        const mapElement = document.querySelector('.map-placeholder-sm');
+        if (mapElement) {
+            // Basic map init to show something
+            const map = L.map(mapElement).setView([10.7769, 106.7009], 12);
+             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap'
+             }).addTo(map);
+             // TODO: Add task markers based on selected task or filter
+              L.marker([10.7758, 106.7011]).addTo(map).bindPopup("Nhiệm vụ 1");
+              L.marker([10.7890, 106.6800]).addTo(map).bindPopup("Nhiệm vụ 2");
+             console.log("Map placeholder initialized.");
+        }
+    } catch (e) {
+        console.error("Error initializing map placeholder:", e);
+    }
+</script>
+{% endblock %} 

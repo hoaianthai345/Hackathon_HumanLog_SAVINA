@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if title %}
+    <title>{{ title }} - Hệ thống phân phối thực phẩm</title>
+    {% else %}
+    <title>Hệ thống phân phối thực phẩm</title>
+    {% endif %}
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    {# Add placeholder for extra head content #}
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    {# --- START: PROTOTYPE ONLY - Define a dummy current_user for testing sidebar --- #}
+    {# Change the 'role_name' value to test different sidebars: #}
+    {# 'demand_admin', 'supply_admin', 'volunteer', 'donor', 'superuser', or set user_authenticated=false for guest #}
+    {% set prototype_user = {
+        'is_authenticated': true,
+        'role': {'name': 'demand_admin'} 
+    } %}
+    {% set current_user = prototype_user %}
+    {# --- END: PROTOTYPE ONLY --- #}
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="d-flex align-items-center justify-content-center">
+                <div>
+                    <div style="font-size: 1.2rem; font-weight: bold;">SAVINA</div>
+                    <div class="user-id">Hệ thống</div>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-content">
+            <!-- Optional Search Bar -->
+            <!-- <div class="input-group mb-4">
+                <input type="text" class="form-control" placeholder="Search..." id="sidebar-search">
+                <button class="btn btn-outline-secondary" type="button"><i class="bi bi-search"></i></button>
+            </div> -->
+
+            <div class="nav flex-column">
+                {# --- START: Role-based Menu --- #}
+
+                {% if current_user.is_authenticated %}
+
+                    {# Common Links for Authenticated Users #}
+                    <div class="nav-item">
+                        <a href="{{ url_for('main.landing') }}" class="nav-link {{ 'active' if request.endpoint == 'main.landing' else '' }}">
+                            <i class="bi bi-house-door-fill"></i> Trang chủ
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="#" class="nav-link"> {# TODO: Add profile route #}
+                            <i class="bi bi-person-circle"></i> Thông tin cá nhân
+                        </a>
+                    </div>
+
+                    {# == Demand Admin Menu == #}
+                    {% if current_user.role.name == 'demand_admin' %}
+                        <div class="nav-item">
+                            <div class="nav-section-header">QUẢN LÝ NHU CẦU</div>
+                        </div>
+                        <div class="nav-item">
+                            <a href="{{ url_for('demand_admin.dashboard') }}" class="nav-link {{ 'active' if request.endpoint.startswith('demand_admin.') else '' }}">
+                                <i class="bi bi-compass-fill"></i> Dashboard Phân phối
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add demand recording route #}
+                                <i class="bi bi-clipboard-data-fill"></i> Ghi nhận nhu cầu
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add planning route #}
+                                <i class="bi bi-diagram-3-fill"></i> Lập kế hoạch
+                            </a>
+                        </div>
+                         <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add delivery assignment route #}
+                                <i class="bi bi-truck"></i> Giao hàng
+                            </a>
+                        </div>
+                         <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add tracking route #}
+                                <i class="bi bi-graph-up"></i> Theo dõi thực thi
+                            </a>
+                        </div>
+
+                    {# == Supply Admin Menu == #}
+                    {% elif current_user.role.name == 'supply_admin' %}
+                        <div class="nav-item">
+                            <div class="nav-section-header">QUẢN LÝ KHO</div>
+                        </div>
+                        <div class="nav-item">
+                            <a href="{{ url_for('supply_admin.dashboard') }}" class="nav-link {{ 'active' if request.endpoint.startswith('supply_admin.') else '' }}">
+                                <i class="bi bi-archive-fill"></i> Dashboard Kho
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add receiving route #}
+                                <i class="bi bi-box-seam-fill"></i> Tiếp nhận TP
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add inventory management route #}
+                                <i class="bi bi-inboxes-fill"></i> Quản lý kho hàng
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add expiry tracking route #}
+                                <i class="bi bi-calendar-x-fill"></i> Theo dõi HSD
+                            </a>
+                        </div>
+                         <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add dispatch route #}
+                                <i class="bi bi-truck"></i> Giao hàng (Từ kho)
+                            </a>
+                        </div>
+
+                    {# == Volunteer Menu == #}
+                    {% elif current_user.role.name == 'volunteer' %}
+                         <div class="nav-item">
+                            <div class="nav-section-header">TÌNH NGUYỆN VIÊN</div>
+                        </div>
+                         <div class="nav-item">
+                            <a href="{{ url_for('volunteer.dashboard') }}" class="nav-link {{ 'active' if request.endpoint.startswith('volunteer.') else '' }}">
+                                <i class="bi bi-person-heart"></i> Dashboard TNV
+                            </a>
+                        </div>
+                         <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add task list route #}
+                                <i class="bi bi-list-task"></i> Nhận nhiệm vụ
+                            </a>
+                        </div>
+                         <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add delivery route #}
+                                <i class="bi bi-truck"></i> Giao hàng
+                            </a>
+                        </div>
+                         <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add confirmation route #}
+                                <i class="bi bi-check-circle-fill"></i> Xác nhận hoàn thành
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="{{ url_for('volunteer.add_recipient') }}" class="nav-link {{ 'active' if request.endpoint == 'volunteer.add_recipient' else '' }}">
+                                <i class="bi bi-person-plus"></i> Thêm người nhận
+                            </a>
+                        </div>
+
+                    {# == Donor Menu == #}
+                    {% elif current_user.role.name == 'donor' %}
+                        <div class="nav-item">
+                            <div class="nav-section-header">NHÀ TÀI TRỢ</div>
+                        </div>
+                         <div class="nav-item">
+                            <a href="{{ url_for('donations.register_donation') }}" class="nav-link {{ 'active' if request.endpoint == 'donations.register_donation' else '' }}">
+                                <i class="bi bi-box2-heart-fill"></i> Quyên góp mới
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add donation history route #}
+                                <i class="bi bi-clock-history"></i> Lịch sử đóng góp
+                            </a>
+                        </div>
+                         <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add delivery tracking for donors #}
+                                <i class="bi bi-truck"></i> Theo dõi giao hàng
+                            </a>
+                        </div>
+
+                    {# == Superuser Menu (Can see Admin) == #}
+                    {% elif current_user.role.name == 'superuser' %}
+                        <div class="nav-item">
+                            <div class="nav-section-header">QUẢN TRỊ VIÊN</div>
+                        </div>
+                        <div class="nav-item">
+                             <a href="{{ url_for('main.superuser_dashboard') }}" class="nav-link {{ 'active' if request.endpoint == 'main.superuser_dashboard' else '' }}">
+                                <i class="bi bi-speedometer2"></i> Superuser Dashboard
+                            </a>
+                        </div>
+                         <div class="nav-item">
+                             <a href="{{ url_for('admin.index') }}" class="nav-link {{ 'active' if request.endpoint.startswith('admin.') else '' }}">
+                                <i class="bi bi-database-gear"></i> Flask Admin
+                            </a>
+                        </div>
+                         {# Superuser might also see other dashboards #}
+                         <div class="nav-item">
+                            <a href="{{ url_for('demand_admin.dashboard') }}" class="nav-link">
+                                <i class="bi bi-compass"></i> QTV Demand DB
+                            </a>
+                        </div>
+                         <div class="nav-item">
+                            <a href="{{ url_for('supply_admin.dashboard') }}" class="nav-link">
+                                <i class="bi bi-archive"></i> QTV Supply DB
+                            </a>
+                        </div>
+                         <div class="nav-item">
+                            <a href="{{ url_for('volunteer.dashboard') }}" class="nav-link">
+                                <i class="bi bi-person-heart"></i> TNV DB
+                            </a>
+                        </div>
+
+                     {# == Default Authenticated User (Recipient?) == #}
+                     {% else %}
+                        <div class="nav-item">
+                            <div class="nav-section-header">NGƯỜI DÙNG</div>
+                        </div>
+                         <div class="nav-item">
+                            <a href="{{ url_for('info.about') }}" class="nav-link {{ 'active' if request.endpoint == 'info.about' else '' }}">
+                                <i class="bi bi-info-circle-fill"></i> Về chúng tôi
+                            </a>
+                        </div>
+                         <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add support registration route #}
+                                <i class="bi bi-person-plus-fill"></i> Đăng ký nhận hỗ trợ
+                            </a>
+                        </div>
+                         <div class="nav-item">
+                            <a href="#" class="nav-link"> {# TODO: Add status tracking route #}
+                                <i class="bi bi-search-heart-fill"></i> Theo dõi trạng thái
+                            </a>
+                        </div>
+                    {% endif %}
+
+                {% else %}
+
+                    {# == Guest Menu == #}
+                     <div class="nav-item">
+                        <div class="nav-section-header">THÔNG TIN</div>
+                    </div>
+                    <div class="nav-item">
+                        <a href="{{ url_for('main.landing') }}" class="nav-link {{ 'active' if request.endpoint == 'main.landing' else '' }}">
+                            <i class="bi bi-house-door-fill"></i> Trang chủ
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="{{ url_for('info.about') }}" class="nav-link {{ 'active' if request.endpoint == 'info.about' else '' }}">
+                            <i class="bi bi-info-circle-fill"></i> Về chúng tôi
+                        </a>
+                    </div>
+                    {# Guests probably don't need personal info link #}
+                    <div class="nav-item">
+                        <a href="#" class="nav-link"> {# TODO: Link to donation info/form #}
+                            <i class="bi bi-box2-heart-fill"></i> Quyên góp
+                        </a>
+                    </div>
+                     <div class="nav-item">
+                        <a href="#" class="nav-link"> {# TODO: Link to support registration info/form #}
+                            <i class="bi bi-person-plus-fill"></i> Đăng ký nhận hỗ trợ
+                        </a>
+                    </div>
+                     <div class="nav-item">
+                        <a href="{{ url_for('auth.login') }}" class="nav-link">
+                            <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+                        </a>
+                    </div>
+
+                {% endif %}
+
+                 {# --- END: Role-based Menu --- #}
+
+                 {# Static links removed, now handled by role logic above #}
+                {#
+                 <div class="nav-item">
+                    <div class="nav-section-header">THÔNG TIN</div>
+                </div>
+                 <div class="nav-item">
+                    <a href="{{ url_for('main.dashboard_index') }}" class="nav-link {{ 'active' if request.endpoint == 'main.dashboard_index' else '' }}">
+                        <i class="bi bi-house-door-fill"></i> Trang chủ
+                    </a>
+                </div>
+                 <div class="nav-item">
+                    <a href="{{ url_for('info.about') }}" class="nav-link {{ 'active' if request.endpoint == 'info.about' else '' }}">
+                        <i class="bi bi-info-circle-fill"></i> Về chúng tôi
+                    </a>
+                </div>
+                 <div class="nav-item">
+                    <a href="{{ url_for('info.guest') }}" class="nav-link {{ 'active' if request.endpoint == 'info.guest' else '' }}">
+                        <i class="bi bi-person-fill"></i> Thông tin Khách
+                    </a>
+                </div>
+                 <div class="nav-item">
+                    <a href="{{ url_for('info.donation_registration_info') }}" class="nav-link {{ 'active' if request.endpoint == 'info.donation_registration_info' else '' }}">
+                        <i class="bi bi-box2-heart-fill"></i> Quyên góp
+                    </a>
+                </div>
+
+                <div class="nav-item">
+                    <div class="nav-section-header">CHỨC NĂNG</div>
+                </div>
+                 <div class="nav-item">
+                    <a href="#" class="nav-link"> <!-- Placeholder -->
+                        <i class="bi bi-box-seam-fill"></i> Tiếp nhận TP
+                    </a>
+                </div>
+                 <div class="nav-item">
+                    <a href="#" class="nav-link"> <!-- Placeholder -->
+                        <i class="bi bi-clipboard-data-fill"></i> Ghi nhận nhu cầu
+                    </a>
+                </div>
+                 <div class="nav-item">
+                    <a href="#" class="nav-link"> <!-- Placeholder -->
+                        <i class="bi bi-diagram-3-fill"></i> Lập kế hoạch
+                    </a>
+                </div>
+                 <div class="nav-item">
+                    <a href="#" class="nav-link"> <!-- Placeholder -->
+                        <i class="bi bi-truck"></i> Giao hàng
+                    </a>
+                </div>
+                 <div class="nav-item">
+                    <a href="#" class="nav-link"> <!-- Placeholder -->
+                         <i class="bi bi-graph-up"></i> Theo dõi
+                    </a>
+                </div>
+                #}
+
+                 <!-- Add more sections and links based on your blueprints -->
+
+            </div>
+
+            <!-- Bottom Menu Group (Optional) -->
+             <div class="nav flex-column bottom-menu-group">
+                <div class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-gear-fill"></i> Cài đặt
+                    </a>
+                 </div>
+                <div class="nav-item">
+                    <a href="{{ url_for('auth.logout') }}" class="nav-link">
+                        <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header d-flex justify-content-between align-items-center">
+            <div class="search-box d-none d-md-block"> <!-- Hide on small screens -->
+                <input type="text" placeholder="Tìm kiếm nhanh...">
+            </div>
+            <div class="d-flex align-items-center header-icons">
+                <h5 class="me-3 mb-0 d-none d-lg-block">{% block header_title %}{% if title %}{{ title }}{% endif %}{% endblock %}</h5>
+                 <button class="btn"><i class="bi bi-bell"></i></button> <!-- Notification Icon -->
+                <!-- Profile Section (Optional) -->
+                <!-- <div class="profile-section ms-3 d-none d-lg-flex">
+                    <div class="profile-image"></div>
+                    <span>Người dùng A</span>
+                    <i class="bi bi-box-arrow-right ms-2"></i>
+                </div> -->
+                 <button class="btn d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
+                    <i class="bi bi-list"></i> <!-- Hamburger for mobile -->
+                </button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+             {% with messages = get_flashed_messages(with_categories=true) %}
+             {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category or 'info' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+             {% endif %}
+             {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Offcanvas Sidebar for mobile -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sidebarOffcanvasLabel">Menu</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <!-- Copy sidebar content here or simplify for mobile -->
+        <div class="sidebar-content p-0">
+             <div class="nav flex-column">
+                 <div class="nav-item">
+                    <div class="nav-section-header">THÔNG TIN</div>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ url_for('main.dashboard_index') }}" class="nav-link {{ 'active' if request.endpoint == 'main.dashboard_index' else '' }}">
+                        <i class="bi bi-house-door-fill"></i> Trang chủ
+                    </a>
+                </div>
+                 <div class="nav-item">
+                    <a href="{{ url_for('info.about') }}" class="nav-link {{ 'active' if request.endpoint == 'info.about' else '' }}">
+                        <i class="bi bi-info-circle-fill"></i> Về chúng tôi
+                    </a>
+                </div>
+                 <div class="nav-item">
+                    <a href="{{ url_for('info.guest') }}" class="nav-link {{ 'active' if request.endpoint == 'info.guest' else '' }}">
+                        <i class="bi bi-person-fill"></i> Thông tin Khách
+                    </a>
+                </div>
+                 <div class="nav-item">
+                    <a href="{{ url_for('info.donation_registration_info') }}" class="nav-link {{ 'active' if request.endpoint == 'info.donation_registration_info' else '' }}">
+                        <i class="bi bi-box2-heart-fill"></i> Quyên góp
+                    </a>
+                </div>
+                 <!-- Add other sections/links as needed for mobile -->
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {# Add placeholder for extra scripts #}
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

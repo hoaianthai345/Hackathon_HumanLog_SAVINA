@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block header_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{ title }}</h1>
+    </div>
+
+    <div class="row g-4">
+        <!-- Card: Landing Page -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title"><i class="bi bi-house-door-fill me-2"></i>Landing Page</h5>
+                    <p class="card-text flex-grow-1">Xem trang chủ công khai của hệ thống.</p>
+                    <a href="{{ url_for('main.landing') }}" class="btn btn-sm btn-outline-primary mt-auto">Truy cập</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Quick Actions -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-success">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title"><i class="bi bi-lightning-charge-fill me-2"></i>Hành động nhanh</h5>
+                    <div class="list-group list-group-flush flex-grow-1">
+                        <a href="{{ url_for('donations.register_donation') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-box2-heart me-2"></i>Tạo đơn quyên góp mới
+                        </a>
+                        <a href="{{ url_for('volunteer.add_recipient') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-person-plus me-2"></i>Thêm người nhận mới
+                        </a>
+                         {# Add other quick actions here #}
+                         <a href="#" class="list-group-item list-group-item-action disabled" aria-disabled="true">Tạo tuyến giao hàng (chưa có)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <!-- Card: Flask-Admin Dashboard -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-primary">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title"><i class="bi bi-database-gear me-2"></i>Quản trị Hệ thống (Admin)</h5>
+                    <p class="card-text flex-grow-1">Xem/Sửa/Xóa dữ liệu các bảng.</p>
+                    <a href="{{ url_for('admin.index') }}" class="btn btn-sm btn-primary mt-auto">Truy cập Admin</a>
+                </div>
+            </div>
+        </div>
+
+         <!-- Card: QTV Supply & Inventory Dashboard -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title"><i class="bi bi-archive-fill me-2"></i>QTV Supply & Inventory</h5>
+                    <p class="card-text flex-grow-1">Quản lý nguồn cung, kho hàng, thực phẩm.</p>
+                    <a href="{{ url_for('supply_admin.dashboard') }}" class="btn btn-sm btn-outline-secondary mt-auto">Truy cập</a>
+                </div>
+            </div>
+        </div>
+
+         <!-- Card: QTV Demand & Distribution Dashboard -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title"><i class="bi bi-truck me-2"></i>QTV Demand & Distribution</h5>
+                    <p class="card-text flex-grow-1">Quản lý nhu cầu, lên kế hoạch, phân phối.</p>
+                    <a href="{{ url_for('demand_admin.dashboard') }}" class="btn btn-sm btn-outline-secondary mt-auto">Truy cập</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Volunteer Dashboard -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title"><i class="bi bi-person-heart me-2"></i>Dashboard Tình nguyện viên</h5>
+                    <p class="card-text flex-grow-1">Xem nhiệm vụ, thêm người nhận...</p>
+                    <a href="{{ url_for('volunteer.dashboard') }}" class="btn btn-sm btn-outline-success mt-auto">Truy cập</a>
+                </div>
+            </div>
+        </div>
+
+         <!-- Card: User Management (Placeholder) -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-warning">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title"><i class="bi bi-people-fill me-2"></i>Quản lý người dùng</h5>
+                    <p class="card-text flex-grow-1">Quản lý tài khoản, phân quyền (chưa có).</p>
+                    <a href="#" class="btn btn-sm btn-outline-warning disabled mt-auto">Truy cập</a>
+                </div>
+            </div>
+        </div>
+
+         <!-- Card: System Settings (Placeholder) -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-danger">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title"><i class="bi bi-gear-fill me-2"></i>Cài đặt hệ thống</h5>
+                    <p class="card-text flex-grow-1">Cấu hình các tham số hệ thống (chưa có).</p>
+                    <a href="#" class="btn btn-sm btn-outline-danger disabled mt-auto">Truy cập</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %} 

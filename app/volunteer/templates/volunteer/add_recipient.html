@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% from "_formhelpers.html" import render_field %}
+
+{% block header_title %}{{ title }}{% endblock %}
+
+{# Add Leaflet CSS in head (Ideally in base.html, but adding here for simplicity) #}
+{% block head_extra %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+<style>
+    #map {
+        height: 300px; /* Adjust height as needed */
+        width: 100%;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <h2 class="mb-4">{{ title }}</h2>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="POST" novalidate id="recipient-form">
+                        {{ form.hidden_tag() }}
+                        {# Render hidden lat/lon fields first #}
+                        {{ form.latitude() }}
+                        {{ form.longitude() }}
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                {{ render_field(form.nickname, {'class': 'form-control'}) }}
+                            </div>
+
+                            {# Address input #}
+                            <div class="col-12">
+                                {{ render_field(form.address, {'class': 'form-control', 'id': 'address-input'}) }}
+                            </div>
+
+                            {# Map container #}
+                            <div class="col-12">
+                                <label class="form-label">Vị trí trên bản đồ (chọn hoặc tìm kiếm)</label>
+                                <div id="map"></div>
+                                <div class="d-flex justify-content-start gap-2 mb-3">
+                                    <button type="button" id="find-address-btn" class="btn btn-sm btn-info">Tìm địa chỉ</button>
+                                    <button type="button" id="current-location-btn" class="btn btn-sm btn-secondary">Lấy vị trí hiện tại</button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                {{ render_field(form.recipient_type, {'class': 'form-select'}) }}
+                            </div>
+                            <div class="col-md-6 d-flex align-items-center justify-content-start pt-3">
+                                <div class="form-check form-switch">
+                                    {{ form.has_kitchen(class='form-check-input', role='switch') }}
+                                    {{ form.has_kitchen.label(class='form-check-label') }}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                {{ render_field(form.note, {'class': 'form-control', 'rows': 3}) }}
+                            </div>
+                        </div>
+                        <hr class="my-4">
+                        {{ form.submit(class='w-100 btn btn-primary btn-lg') }}
+                        <a href="{{ url_for('volunteer.dashboard') }}" class="w-100 btn btn-outline-secondary mt-2">Hủy bỏ</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{# Add Leaflet JS and custom script at the end #}
+{% block scripts %}
+{{ super() }} {# Include scripts from base.html if any #}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Map Initialization ---
+        const map = L.map('map').setView([10.7769, 106.7009], 13); // Default center (e.g., HCMC)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        let marker = null;
+        const latInput = document.getElementById('latitude');
+        const lonInput = document.getElementById('longitude');
+        const addressInput = document.getElementById('address-input');
+
+        function updateMarkerAndInputs(lat, lon, updateAddress = false) {
+            if (!lat || !lon) return;
+            const latlng = L.latLng(lat, lon);
+            if (marker) {
+                marker.setLatLng(latlng);
+            } else {
+                marker = L.marker(latlng, {draggable: true}).addTo(map);
+                marker.on('dragend', function(event) {
+                    const position = marker.getLatLng();
+                    updateMarkerAndInputs(position.lat, position.lng, true); // Update address on drag end
+                });
+            }
+            map.setView(latlng, 16); // Zoom in
+            latInput.value = lat.toFixed(6);
+            lonInput.value = lon.toFixed(6);
+
+            // Optional: Reverse geocode to update address input
+            // This requires a geocoding service (like Nominatim)
+            if (updateAddress) {
+                 // Placeholder: Call reverse geocoding API here
+                 // Example using Nominatim (requires careful usage - check terms of service)
+                // fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                //    .then(response => response.json())
+                //    .then(data => {
+                //        if (data && data.display_name) {
+                //            addressInput.value = data.display_name;
+                //        }
+                //    })
+                //    .catch(error => console.error('Reverse geocoding error:', error));
+                console.log("Need to implement reverse geocoding to update address field.");
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Click on map
+        map.on('click', function(e) {
+            updateMarkerAndInputs(e.latlng.lat, e.latlng.lng, true); // Update address on map click
+        });
+
+        // Get Current Location Button
+        document.getElementById('current-location-btn').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    updateMarkerAndInputs(position.coords.latitude, position.coords.longitude, true);
+                }, function(error) {
+                    console.error("Geolocation error: ", error);
+                    alert("Không thể lấy vị trí hiện tại. Lỗi: " + error.message);
+                });
+            } else {
+                alert("Trình duyệt của bạn không hỗ trợ Geolocation.");
+            }
+        });
+
+        // Find Address Button (Geocoding)
+        document.getElementById('find-address-btn').addEventListener('click', function() {
+            const address = addressInput.value;
+            if (!address) {
+                alert('Vui lòng nhập địa chỉ.');
+                return;
+            }
+            // Placeholder: Call geocoding API here
+            // Example using Nominatim (requires careful usage - check terms of service)
+            // const query = encodeURIComponent(address);
+            // fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`)
+            //    .then(response => response.json())
+            //    .then(data => {
+            //        if (data && data.length > 0) {
+            //            const bestMatch = data[0];
+            //            updateMarkerAndInputs(parseFloat(bestMatch.lat), parseFloat(bestMatch.lon));
+            //        } else {
+            //            alert('Không tìm thấy địa chỉ.');
+            //        }
+            //    })
+            //    .catch(error => {
+            //        console.error('Geocoding error:', error);
+            //        alert('Lỗi khi tìm kiếm địa chỉ.');
+            //    });
+             alert('Chức năng tìm địa chỉ cần được cài đặt (Geocoding API).');
+        });
+
+        // If form has initial lat/lon values (e.g., editing existing recipient), show marker
+        if (latInput.value && lonInput.value) {
+             updateMarkerAndInputs(parseFloat(latInput.value), parseFloat(lonInput.value));
+        }
+    });
+</script>
+{% endblock %} 
